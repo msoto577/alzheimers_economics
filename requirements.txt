@@ -4,7 +4,6 @@ nbformat
 simpy
 numpy
 scipy
-matplotlib.pyplot
-matplotlib.patches
+matplotlib
 pandas
 lifelines
