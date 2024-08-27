@@ -3,7 +3,7 @@ nbconvert
 nbformat
 simpy
 numpy
-scipy.stats
+scipy
 matplotlib.pyplot
 matplotlib.patches
 pandas
