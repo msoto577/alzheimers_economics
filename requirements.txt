@@ -1,11 +1,9 @@
 streamlit
 nbconvert
 nbformat
-random
 simpy
 numpy
 scipy.stats
-math
 matplotlib.pyplot
 matplotlib.patches
 pandas
