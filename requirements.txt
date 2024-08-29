@@ -1,9 +1,0 @@
-streamlit
-nbconvert
-nbformat
-simpy
-numpy
-scipy
-matplotlib
-pandas
-lifelines
