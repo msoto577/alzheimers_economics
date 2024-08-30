@@ -1,70 +1,79 @@
 import streamlit as st
-from nbconvert import PythonExporter
+import requests
 import nbformat
-import os
+from nbconvert.preprocessors import ExecutePreprocessor
+from io import StringIO
+from IPython import get_ipython
+import sys
 
-# Function to read and convert notebook to Python code
-def run_notebook(notebook_path):
-    if not os.path.isfile(notebook_path):
-        st.error(f"The file {notebook_path} does not exist.")
-        return ""
+# Function to fetch notebook from GitHub
+def fetch_notebook_from_github(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to fetch notebook: {e}")
+        return None
+
+# Function to execute notebook cells using IPython and nbformat
+def execute_notebook(notebook_content):
+    notebook = nbformat.reads(notebook_content, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
     
-    with open(notebook_path) as f:
-        notebook = nbformat.read(f, as_version=4)
-    exporter = PythonExporter()
-    source, _ = exporter.from_notebook_node(notebook)
-    return source
+    # Execute notebook in an isolated environment
+    try:
+        # Create a new IPython instance (or use existing one)
+        ipython = get_ipython() if get_ipython() else IPython.get_ipython()
+        
+        # Redirect stdout to capture the output
+        stdout_backup = sys.stdout
+        sys.stdout = StringIO()
+        
+        ep.preprocess(notebook, {'metadata': {'path': './'}})
+        sys.stdout.seek(0)
+        execution_output = sys.stdout.read()  # Get the output
+        sys.stdout = stdout_backup  # Restore stdout
+        
+        return execution_output
 
-# Define the path to your Jupyter notebook
-notebook_path = 'pages/IPECAD_CEA.ipynb'
+    except Exception as e:
+        st.error(f"Error executing the notebook: {e}")
+        return None
 
-# Convert notebook code
-notebook_code = run_notebook(notebook_path)
+# Define the GitHub URL of your notebook (raw URL)
+notebook_url = 'https://raw.githubusercontent.com/msoto577/alzheimers_economics/main/pages/IPECAD_BIA.ipynb'
 
-# Print notebook code to Streamlit for debugging
-#st.write("Extracted notebook code:")
-#st.code(notebook_code, language='python')
+# Fetch and execute the notebook
+notebook_content = fetch_notebook_from_github(notebook_url)
+if notebook_content:
+    execution_output = execute_notebook(notebook_content)
+    if execution_output:
+        st.text("Notebook execution output:")
+        st.code(execution_output)
 
-# Execute the notebook code
-exec(notebook_code, globals())
-
-# Streamlit app layout
+# Streamlit app layout (as in the previous code)
 st.title('Cost-Effectiveness Analysis for Alzheimer`s Disease App')
 
 # Define user inputs
 replications = st.slider('Number of Replications', min_value=1, max_value=100, value=2)
 patients = st.slider('Number of Patients', min_value=1, max_value=100000, value=10)
 
-
 if st.button('Run Simulation'):
-    # Check if the function exists before calling it
+    # If 'main' function was defined in the notebook, call it with parameters
     if 'main' in globals():
         results = main(replications, patients)
         
-        # Aggregate survival times
+        # Assuming `aggregate_survival_times_by_stage` and other functions are also defined
         control_survival_times, intervention_survival_times = aggregate_survival_times_by_stage(results)
-
+        
         # Create and display the survival summary table
         summary_df = create_survival_summary_table(control_survival_times, intervention_survival_times)
         st.write('Survival Summary Table:')
         st.dataframe(summary_df)
-
+        
         # Plot survival curves with confidence intervals
         st.write('Survival Curves with Confidence Intervals:')
         fig_survival, ax_survival = plt.subplots()
         plot_survival_curve_with_confidence_intervals(control_survival_times, intervention_survival_times)
         st.pyplot(fig_survival)
-
-        # Plot differences with RCEI and ellipse
-        st.write('Differences with RCEI and Ellipse:')
-        fig_rcei = plot_differences_with_rcei_and_ellipse(results)  # Get the RCEI figure
-        st.pyplot(fig_rcei)  # Display the RCEI figure in Streamlit
-
-        # Plot acceptability curve
-        st.write('Acceptability Curve:')
-        fig_acceptability, ax_acceptability = plt.subplots()
-        acceptability_curve(results)
-        st.pyplot(fig_acceptability)
-
-    else:
-        st.write('Function not found in the notebook code.')
