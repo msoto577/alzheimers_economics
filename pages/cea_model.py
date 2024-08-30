@@ -2,7 +2,6 @@ import streamlit as st
 from nbconvert import PythonExporter
 import nbformat
 import os
-import requests
 
 # Function to read and convert notebook to Python code
 def run_notebook(notebook_path):
@@ -16,33 +15,21 @@ def run_notebook(notebook_path):
     source, _ = exporter.from_notebook_node(notebook)
     return source
 
-# Define the URL to your Jupyter notebook
-url = "https://raw.githubusercontent.com/msoto577/alzheimers_economics/main/pages/IPECAD_CEA.ipynb"
+# Define the path to your Jupyter notebook
+notebook_path = 'C:/Users/msoto/simPy_Trials/IPECAD/PRUEBAS STREAMLIT/IPECAD_CEA'
 
-# Fetch the notebook file
-response = requests.get(url)
+# Convert notebook code
+notebook_code = run_notebook(notebook_path)
 
-# Check if the request was successful
-if response.status_code == 200:
-    # Save the content to a temporary file
-    notebook_path = "IPECAD_CEA.ipynb"
-    with open(notebook_path, "wb") as f:
-        f.write(response.content)
+# Print notebook code to Streamlit for debugging
+#st.write("Extracted notebook code:")
+#st.code(notebook_code, language='python')
 
-    # Convert notebook code
-    notebook_code = run_notebook(notebook_path)
-
-    # Execute the notebook code
-    exec(notebook_code, globals())
-
-    # Optionally, clean up the temporary file
-    os.remove(notebook_path)
-else:
-    st.error("Failed to fetch the notebook file. Please check the URL or try again later.")
+# Execute the notebook code
+exec(notebook_code, globals())
 
 # Streamlit app layout
-st.title('Cost-Effectiveness Analysis')
-
+st.title('Cost-Effectiveness Analysis for Alzheimer`s Disease App')
 
 # Define user inputs
 replications = st.slider('Number of Replications', min_value=1, max_value=100, value=2)
