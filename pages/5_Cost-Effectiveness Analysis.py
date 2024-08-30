@@ -16,7 +16,7 @@ def run_notebook(notebook_path):
     return source
 
 # Define the path to your Jupyter notebook
-notebook_path = 'C:/Users/msoto/simPy_Trials/IPECAD/PRUEBAS STREAMLIT/IPECAD_CEA.ipynb'
+notebook_path = 'pages/IPECAD_CEA.ipynb'
 
 # Convert notebook code
 notebook_code = run_notebook(notebook_path)
