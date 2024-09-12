@@ -17,7 +17,7 @@ def run_notebook(notebook_path):
     return source
 
 # Define the URL to your Jupyter notebook
-url = "https://raw.githubusercontent.com/msoto577/alzheimers_economics/main/pages/IPECAD_CEA.ipynb"
+url = "https://raw.githubusercontent.com/msoto577/alzheimers_economics/main/pages/IPECAD_CEA (4).ipynb"
 
 # Fetch the notebook file
 response = requests.get(url)
