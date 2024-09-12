@@ -3,7 +3,8 @@ nbconvert
 nbformat
 simpy
 numpy
-scipy==1.9.3
+scipy
 matplotlib
 pandas
-lifelines==0.27.0
+lifelines
+
